@@ -48,7 +48,7 @@ python main.py eval_model_iou mini/trainval --modelf=MODEL_LOCATION --dataroot=N
 Visualize the BEV segmentation output by a model:
 
 ```
-python main.py viz_model_preds mini/trainval --modelf=MODEL_LOCATION --dataroot=NUSCENES_ROOT --map_folder=NUSCENES_MAP_ROOT
+python main.py viz_model_preds mini --modelf=./model525000.pt --dataroot=dataset/nuScenes --map_folder=dataset/nuScenes/mini/ --gpuid=-1
 ```
 <img src="./imgs/eval.gif">
 
