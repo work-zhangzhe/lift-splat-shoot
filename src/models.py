@@ -37,8 +37,8 @@ class Up(nn.Module):
 
 class CamEncode(nn.Module):
     def __init__(self, D, C, downsample):
-        # D = 41
-        # C = 64
+        # D = 41，41 种离散深度
+        # C = 64，深度向量编码长度
         # downsample = 16
         super(CamEncode, self).__init__()
         self.D = D
@@ -90,8 +90,8 @@ class CamEncode(nn.Module):
         return x
 
     def forward(self, x):
-        # x.shape = [24, 3, 128, 352]
-        depth, x = self.get_depth_feat(x)  # [24, 64, 41, 8, 22]
+        # x.shape = [24, 3, 128, 352]，[batch*cameras, c, h, w]
+        depth, x = self.get_depth_feat(x)  # [24, 64, 41, 8, 22], [batch*cameras, c, depth_logits, h, w]
 
         return x
 
@@ -179,7 +179,8 @@ class LiftSplatShoot(nn.Module):
         self.downsample = 16  # 下采样 16 倍
         self.camC = 64  # 与模型大小/精度相关，没有实际意义
         # frustum = 锥台
-        self.frustum = self.create_frustum()  # shape = torch.Size([41, 8, 22, 3])
+        # shape = torch.Size([41, 8, 22, 3])，[depth_cls, h, w, (xyz)]
+        self.frustum = self.create_frustum()
         self.D, _, _, _ = self.frustum.shape
         self.camencode = CamEncode(self.D, self.camC, self.downsample)
         self.bevencode = BevEncode(inC=self.camC, outC=outC)
@@ -190,7 +191,7 @@ class LiftSplatShoot(nn.Module):
     def create_frustum(self):
         # 创建一个视锥映射表，作用是：
         #   1. H 和 W 上从小图（8, 22）向大图（128, 352）映射
-        #   2. depth 上从 [0, 40] 向真实深度 [4, 45] 映射表
+        #   2. depth 上从 [0, 40] 向真实深度 [4, 45] 映射
         # make grid in image plane
         ogfH, ogfW = self.data_aug_conf["final_dim"]
         fH, fW = ogfH // self.downsample, ogfW // self.downsample
